@@ -4,13 +4,13 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application source code
-COPY..
+COPY . .
 
 # Set the API URL for the backend (can be overridden at build time)
 ARG REACT_APP_API_URL_CELL_A=/api/cell-a

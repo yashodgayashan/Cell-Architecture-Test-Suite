@@ -17,10 +17,10 @@ FROM alpine:latest
 WORKDIR /
 
 # Copy the static binary from the builder stage
-COPY --from=builder /app/user-svc.
+COPY --from=builder /app/user-svc /user-svc
 
 # Expose the port the app runs on
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["./user-svc"]
+CMD ["/user-svc"]
