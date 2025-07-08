@@ -1,0 +1,37 @@
+{{- if .Values.reactClient.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.reactClient.frontend.name }}
+  namespace: {{ .Values.reactClient.namespace }}
+  labels:
+    app: {{ .Values.reactClient.frontend.name }}
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.reactClient.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.reactClient.frontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.reactClient.frontend.name }}
+        {{- include "cell-architecture.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Values.reactClient.frontend.name }}
+        image: {{ .Values.global.registry }}/{{ .Values.reactClient.frontend.image }}:{{ .Values.global.imageTag }}
+        ports:
+        - containerPort: {{ .Values.reactClient.frontend.port }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+{{- end }}

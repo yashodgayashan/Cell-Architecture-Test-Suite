@@ -1,0 +1,61 @@
+{{- if .Values.networkPolicies.enabled }}
+{{- if .Values.networkPolicies.cilium.enabled }}
+# Allow DNS traffic from Cell A
+{{- if .Values.cellA.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns-cell-a
+  namespace: {{ .Values.cellA.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": {{ .Values.networkPolicies.dns.namespace }}
+        "k8s:k8s-app": {{ .Values.networkPolicies.dns.app }}
+    toPorts:
+    - ports:
+      - port: "{{ .Values.networkPolicies.dns.port }}"
+        protocol: UDP
+---
+{{- end }}
+# Allow DNS traffic from Cell B
+{{- if .Values.cellB.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns-cell-b
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": {{ .Values.networkPolicies.dns.namespace }}
+        "k8s:k8s-app": {{ .Values.networkPolicies.dns.app }}
+    toPorts:
+    - ports:
+      - port: "{{ .Values.networkPolicies.dns.port }}"
+        protocol: UDP
+{{- end }}
+{{- end }}
+{{- end }}

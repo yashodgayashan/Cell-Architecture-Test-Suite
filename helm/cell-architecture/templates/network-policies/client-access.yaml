@@ -1,0 +1,61 @@
+{{- if .Values.networkPolicies.enabled }}
+{{- if .Values.networkPolicies.cilium.enabled }}
+# Allow React Client to call Cell A frontend
+{{- if and .Values.cellA.enabled .Values.reactClient.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-client-to-cell-a
+  namespace: {{ .Values.cellA.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellA.frontendService.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.reactClient.frontend.name }}
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Values.reactClient.namespace }}
+---
+{{- end }}
+# Allow React Client to call Cell B frontend
+{{- if and .Values.cellB.enabled .Values.reactClient.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-client-to-cell-b
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellB.analyticsFrontend.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.reactClient.frontend.name }}
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Values.reactClient.namespace }}
+{{- end }}
+{{- end }}
+{{- end }}

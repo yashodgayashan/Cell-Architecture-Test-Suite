@@ -1,0 +1,23 @@
+{{- if .Values.reactClient.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.reactClient.service.name }}
+  namespace: {{ .Values.reactClient.namespace }}
+  labels:
+    app: {{ .Values.reactClient.frontend.name }}
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app: {{ .Values.reactClient.frontend.name }}
+  ports:
+  - port: {{ .Values.reactClient.service.port }}
+    targetPort: {{ .Values.reactClient.frontend.port }}
+{{- end }}

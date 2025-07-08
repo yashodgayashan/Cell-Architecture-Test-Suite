@@ -1,0 +1,62 @@
+{{- if .Values.cellB.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cellB.reportGenerator.name }}
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    app: {{ .Values.cellB.reportGenerator.name }}
+    cell: b
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.cellB.reportGenerator.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cellB.reportGenerator.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cellB.reportGenerator.name }}
+        cell: b
+        {{- include "cell-architecture.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Values.cellB.reportGenerator.name }}
+        image: {{ .Values.global.registry }}/{{ .Values.cellB.reportGenerator.image }}:{{ .Values.global.imageTag }}
+        ports:
+        - containerPort: {{ .Values.cellB.reportGenerator.port }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cellB.reportGenerator.name }}
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    app: {{ .Values.cellB.reportGenerator.name }}
+    cell: b
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app: {{ .Values.cellB.reportGenerator.name }}
+  ports:
+  - port: {{ .Values.cellB.reportGenerator.port }}
+    targetPort: {{ .Values.cellB.reportGenerator.port }}
+{{- end }}

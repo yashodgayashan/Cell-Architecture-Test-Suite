@@ -1,0 +1,17 @@
+apiVersion: v2
+name: cell-architecture
+description: A Helm chart for Cell-Based Architecture Test Suite
+type: application
+version: 0.1.0
+appVersion: "1.0"
+maintainers:
+  - name: Cell Architecture Team
+keywords:
+  - cell-architecture
+  - microservices
+  - kubernetes
+  - cilium
+  - network-policies
+home: https://github.com/your-org/cell-architecture-test-suite
+sources:
+  - https://github.com/your-org/cell-architecture-test-suite

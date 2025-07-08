@@ -1,0 +1,62 @@
+{{- if .Values.cellB.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cellB.analyticsFrontend.name }}
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    app: {{ .Values.cellB.analyticsFrontend.name }}
+    cell: b
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.cellB.analyticsFrontend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cellB.analyticsFrontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cellB.analyticsFrontend.name }}
+        cell: b
+        {{- include "cell-architecture.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Values.cellB.analyticsFrontend.name }}
+        image: {{ .Values.global.registry }}/{{ .Values.cellB.analyticsFrontend.image }}:{{ .Values.global.imageTag }}
+        ports:
+        - containerPort: {{ .Values.cellB.analyticsFrontend.port }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cellB.analyticsFrontend.name }}
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    app: {{ .Values.cellB.analyticsFrontend.name }}
+    cell: b
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app: {{ .Values.cellB.analyticsFrontend.name }}
+  ports:
+  - port: {{ .Values.cellB.analyticsFrontend.port }}
+    targetPort: {{ .Values.cellB.analyticsFrontend.port }}
+{{- end }}

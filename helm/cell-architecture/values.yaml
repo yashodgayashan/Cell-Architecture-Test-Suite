@@ -1,0 +1,101 @@
+# Global configuration
+global:
+  registry: your-registry
+  imageTag: latest
+
+# Cell A configuration
+cellA:
+  enabled: true
+  namespace: cell-a
+  
+  authService:
+    name: auth-svc
+    image: auth-svc
+    replicas: 1
+    port: 8080
+    
+  userService:
+    name: user-svc
+    image: user-svc
+    replicas: 1  # This will be scaled to 0 for testing
+    port: 8080
+    
+  frontendService:
+    name: frontend-svc
+    image: frontend-svc
+    replicas: 1
+    port: 8080
+
+# Cell B configuration
+cellB:
+  enabled: true
+  namespace: cell-b
+  
+  reportGenerator:
+    name: report-generator
+    image: report-generator
+    replicas: 1
+    port: 8080
+    
+  analyticsFrontend:
+    name: analytics-frontend
+    image: analytics-frontend
+    replicas: 1
+    port: 8080
+
+# React Client configuration
+reactClient:
+  enabled: true
+  namespace: react-client
+  
+  frontend:
+    name: react-frontend
+    image: react-frontend
+    replicas: 1
+    port: 80
+    
+  service:
+    name: react-frontend-svc
+    port: 80
+    
+  ingress:
+    enabled: true
+    name: react-frontend-ingress
+    className: ""
+    annotations: {}
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Network Policies configuration
+networkPolicies:
+  enabled: true
+  cilium:
+    enabled: true
+  
+  # Enable cross-cell communication for testing
+  crossCell:
+    enabled: false  # Set to true to allow cross-cell traffic from B to A
+    
+  # DNS configuration
+  dns:
+    namespace: kube-system
+    app: kube-dns
+    port: 53
+
+# Resource limits (optional)
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Common labels
+commonLabels: {}
+
+# Additional annotations
+commonAnnotations: {}

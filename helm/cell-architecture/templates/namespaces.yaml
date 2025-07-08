@@ -1,0 +1,49 @@
+{{- if .Values.cellA.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.cellA.namespace }}
+  labels:
+    cell: a
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+---
+{{- if .Values.cellB.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.cellB.namespace }}
+  labels:
+    cell: b
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+---
+{{- if .Values.reactClient.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.reactClient.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

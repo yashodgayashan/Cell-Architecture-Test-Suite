@@ -1,0 +1,217 @@
+# Namespaces
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cell-a
+  labels:
+    cell: a
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cell-b
+  labels:
+    cell: b
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: react-client
+---
+# --- Auth Service (Cell A) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-svc
+  namespace: cell-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-svc
+  template:
+    metadata:
+      labels:
+        app: auth-svc
+        cell: a
+    spec:
+      containers:
+      - name: auth-svc
+        image: your-registry/auth-svc:latest # <-- REPLACE THIS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-svc
+  namespace: cell-a
+spec:
+  selector:
+    app: auth-svc
+  ports:
+  - port: 8080
+---
+# --- User Service (Cell A) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-svc
+  namespace: cell-a
+spec:
+  replicas: 1 # This will be scaled to 0 for testing
+  selector:
+    matchLabels:
+      app: user-svc
+  template:
+    metadata:
+      labels:
+        app: user-svc
+        cell: a
+    spec:
+      containers:
+      - name: user-svc
+        image: your-registry/user-svc:latest # <-- REPLACE THIS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-svc
+  namespace: cell-a
+spec:
+  selector:
+    app: user-svc
+  ports:
+  - port: 8080
+---
+# --- Frontend Service (Cell A) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-svc
+  namespace: cell-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-svc
+  template:
+    metadata:
+      labels:
+        app: frontend-svc
+        cell: a
+    spec:
+      containers:
+      - name: frontend-svc
+        image: your-registry/frontend-svc:latest # <-- REPLACE THIS
+---
+# --- Report Generator (Cell B) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-generator
+  namespace: cell-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-generator
+  template:
+    metadata:
+      labels:
+        app: report-generator
+        cell: b
+    spec:
+      containers:
+      - name: report-generator
+        image: your-registry/report-generator:latest # <-- REPLACE THIS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-generator
+  namespace: cell-b
+spec:
+  selector:
+    app: report-generator
+  ports:
+  - port: 8080
+---
+# --- Analytics Frontend (Cell B) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-frontend
+  namespace: cell-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-frontend
+  template:
+    metadata:
+      labels:
+        app: analytics-frontend
+        cell: b
+    spec:
+      containers:
+      - name: analytics-frontend
+        image: your-registry/analytics-frontend:latest # <-- REPLACE THIS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-frontend
+  namespace: cell-b
+spec:
+  selector:
+    app: analytics-frontend
+  ports:
+  - port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-frontend
+  namespace: react-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-frontend
+  template:
+    metadata:
+      labels:
+        app: react-frontend
+    spec:
+      containers:
+      - name: react-frontend
+        image: your-registry/react-frontend:latest # <-- REPLACE THIS
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-frontend-svc
+  namespace: react-client
+spec:
+  selector:
+    app: react-frontend
+  ports:
+  - port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: react-frontend-ingress
+  namespace: react-client
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: react-frontend-svc
+            port:
+              number: 80

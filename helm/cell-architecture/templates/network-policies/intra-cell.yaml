@@ -1,0 +1,78 @@
+{{- if .Values.networkPolicies.enabled }}
+{{- if .Values.networkPolicies.cilium.enabled }}
+# Allow traffic within Cell A
+{{- if .Values.cellA.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-a-user
+  namespace: {{ .Values.cellA.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellA.userService.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.cellA.frontendService.name }}
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-a-auth
+  namespace: {{ .Values.cellA.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellA.authService.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.cellA.userService.name }}
+---
+{{- end }}
+# Allow traffic within Cell B
+{{- if .Values.cellB.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-b
+  namespace: {{ .Values.cellB.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellB.reportGenerator.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.cellB.analyticsFrontend.name }}
+{{- end }}
+{{- end }}
+{{- end }}

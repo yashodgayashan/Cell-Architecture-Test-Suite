@@ -1,0 +1,154 @@
+# Default Deny for Cell A
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-cell-a
+  namespace: cell-a
+spec:
+  endpointSelector: {}
+  ingress:
+  egress:
+---
+# Default Deny for Cell B
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-cell-b
+  namespace: cell-b
+spec:
+  endpointSelector: {}
+  ingress:
+  egress:
+---
+# Allow DNS traffic from all cells
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: cell-a
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": kube-system
+        "k8s:k8s-app": kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: UDP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns-b
+  namespace: cell-b
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": kube-system
+        "k8s:k8s-app": kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: UDP
+---
+# Allow traffic within Cell A
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-a
+  namespace: cell-a
+spec:
+  endpointSelector:
+    matchLabels:
+      app: user-svc
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: frontend-svc
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-a-2
+  namespace: cell-a
+spec:
+  endpointSelector:
+    matchLabels:
+      app: auth-svc
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: user-svc
+---
+# Allow traffic within Cell B
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-intra-cell-b
+  namespace: cell-b
+spec:
+  endpointSelector:
+    matchLabels:
+      app: report-generator
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: analytics-frontend
+---
+# Allow React Client to call frontends
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-client-to-frontends
+  namespace: cell-a
+spec:
+  endpointSelector:
+    matchLabels:
+      app: frontend-svc
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: react-frontend
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: react-client
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-client-to-frontends-b
+  namespace: cell-b
+spec:
+  endpointSelector:
+    matchLabels:
+      app: analytics-frontend
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: react-frontend
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: react-client
+---
+# THE CRITICAL TEST POLICY: Allow cross-cell traffic from B to A
+# Apply this policy only when you want to test the "allow" scenario.
+# apiVersion: "cilium.io/v2"
+# kind: CiliumNetworkPolicy
+# metadata:
+#   name: allow-cross-cell-b-to-a
+#   namespace: cell-a
+# spec:
+#   endpointSelector:
+#     matchLabels:
+#       app: user-svc
+#   ingress:
+#   - fromEndpoints:
+#     - matchLabels:
+#         app: report-generator
+#       namespaceSelector:
+#         matchLabels:
+#           cell: b

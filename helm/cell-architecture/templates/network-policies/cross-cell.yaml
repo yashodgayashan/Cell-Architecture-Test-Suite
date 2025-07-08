@@ -1,0 +1,35 @@
+{{- if .Values.networkPolicies.enabled }}
+{{- if .Values.networkPolicies.cilium.enabled }}
+{{- if .Values.networkPolicies.crossCell.enabled }}
+# THE CRITICAL TEST POLICY: Allow cross-cell traffic from B to A
+# Apply this policy only when you want to test the "allow" scenario.
+{{- if and .Values.cellA.enabled .Values.cellB.enabled }}
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-cross-cell-b-to-a
+  namespace: {{ .Values.cellA.namespace }}
+  labels:
+    {{- include "cell-architecture.labels" . | nindent 4 }}
+    {{- with .Values.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ .Values.cellA.userService.name }}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: {{ .Values.cellB.reportGenerator.name }}
+      namespaceSelector:
+        matchLabels:
+          cell: b
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
