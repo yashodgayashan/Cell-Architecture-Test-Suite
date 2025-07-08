@@ -1,0 +1,9 @@
+go 1.21
+
+use (
+	./cell-a-apps/auth-svc
+	./cell-a-apps/frontend-svc
+	./cell-a-apps/user-svc
+	./cell-b-apps/analytics-frontend
+	./cell-b-apps/report-generator
+)

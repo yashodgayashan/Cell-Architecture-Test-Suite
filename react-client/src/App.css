@@ -1,0 +1,30 @@
+.App { text-align: center; }
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+.button-container { margin: 20px; }
+button {
+  font-size: calc(8px + 2vmin);
+  margin: 0 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+.response-container,.error-container {
+  margin-top: 20px;
+  text-align: left;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 800px;
+  overflow-x: auto;
+}
+.error-container { color: #ff6b6b; }
+pre { white-space: pre-wrap; word-wrap: break-word; }

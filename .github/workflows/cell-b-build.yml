@@ -1,0 +1,33 @@
+name: Build Cell B Services
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'cell-b-apps/**'
+      - '.github/workflows/cell-b-build.yml'
+      - '.github/workflows/reusable-go-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'cell-b-apps/**'
+      - '.github/workflows/cell-b-build.yml'
+      - '.github/workflows/reusable-go-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-analytics-frontend:
+    uses: ./.github/workflows/reusable-go-build.yml
+    with:
+      service-name: analytics-frontend
+      service-path: cell-b-apps/analytics-frontend
+      image-name: cell-b-analytics-frontend
+    secrets: inherit
+
+  build-report-generator:
+    uses: ./.github/workflows/reusable-go-build.yml
+    with:
+      service-name: report-generator
+      service-path: cell-b-apps/report-generator
+      image-name: cell-b-report-generator
+    secrets: inherit

@@ -1,0 +1,41 @@
+name: Build Cell A Services
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'cell-a-apps/**'
+      - '.github/workflows/cell-a-build.yml'
+      - '.github/workflows/reusable-go-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'cell-a-apps/**'
+      - '.github/workflows/cell-a-build.yml'
+      - '.github/workflows/reusable-go-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-auth-svc:
+    uses: ./.github/workflows/reusable-go-build.yml
+    with:
+      service-name: auth-svc
+      service-path: cell-a-apps/auth-svc
+      image-name: cell-a-auth-svc
+    secrets: inherit
+
+  build-user-svc:
+    uses: ./.github/workflows/reusable-go-build.yml
+    with:
+      service-name: user-svc
+      service-path: cell-a-apps/user-svc
+      image-name: cell-a-user-svc
+    secrets: inherit
+
+  build-frontend-svc:
+    uses: ./.github/workflows/reusable-go-build.yml
+    with:
+      service-name: frontend-svc
+      service-path: cell-a-apps/frontend-svc
+      image-name: cell-a-frontend-svc
+    secrets: inherit
